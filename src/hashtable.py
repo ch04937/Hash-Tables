@@ -54,16 +54,16 @@ class HashTable:
         # pass key through the mod function to get index
         index = self._hash_mod(key)
 
-        # if mod key is already in table
-        if self.storage[index] == self.storage:
-            # find next index that is empty
-            return f'value already in table'
+        # error handling
+        if self.storage[index] is not None:
+            print(f'error collision has occured at {index}')
 
+            return
         # else index is avaliable does not exist
         else:
             # store value there
-            self.storage[index] = value
-            return value
+            self.storage[index] = (key, value)
+            return
 
     def remove(self, key):
         '''
@@ -73,7 +73,19 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        index = self._hash_mod(key)
+
+        # error handling
+        if self.storage[index] is not None:
+            if self.storage[index][0] == key:
+                self.storage[index] = None
+            else:
+                print(f'error collision has occured at {index}')
+
+        # else index is avaliable does not exist
+        else:
+            print('warning key ({key}) was not found')
+        return
 
     def retrieve(self, key):
         '''
@@ -87,12 +99,14 @@ class HashTable:
         index = self._hash_mod(key)
 
         # if key is not found return None
-        if index in self.storage:
-            return f'not fond'
-
-        # else return the value stored
-        elif index not in self.storage:
-            return self.storage[index]
+        if self.storage is not None:
+            if self.storage[index][0] == key:
+                return self.storage[index][1]
+            else:
+                print(f'warining collision at ({index})')
+        else:
+            return
+        return
 
     def resize(self):
         '''
@@ -101,12 +115,15 @@ class HashTable:
 
         Fill this in.
         '''
+        old_storage = self.storage
         # double cap
         self.capacity *= 2
         # create new storage
-        new_storage = [None] * self.capacity
+        self.storage = [None] * self.capacity
         # assign old storage to new storage
-        self.storage = new_storage
+
+        for item in old_storage:
+            self.insert(item[0], item[1])
 
 
 if __name__ == "__main__":
