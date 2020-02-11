@@ -53,17 +53,20 @@ class HashTable:
         '''
         # pass key through the mod function to get index
         index = self._hash_mod(key)
+        node = self.storage[index]
 
-        # error handling
-        if self.storage[index] is not None:
-            print(f'error collision has occured at {index}')
-
+        # if empty
+        if node is None:
+            # create node
+            self.storage[index] = LinkedPair(key, value)
             return
-        # else index is avaliable does not exist
-        else:
-            # store value there
-            self.storage[index] = (key, value)
-            return
+        # if collision
+        prev = node
+        while node is not None:
+            prev = node
+            node = node.next
+        # add the new node
+        prev.next = LinkedPair(key, value)
 
     def remove(self, key):
         '''
@@ -74,18 +77,27 @@ class HashTable:
         Fill this in.
         '''
         index = self._hash_mod(key)
+        node = self.storage[index]
+        prev = None
 
-        # error handling
-        if self.storage[index] is not None:
-            if self.storage[index][0] == key:
-                self.storage[index] = None
-            else:
-                print(f'error collision has occured at {index}')
+        # traverse List
+        while node is not None and node.key != key:
+            prev = node
+            node = node.next
 
-        # else index is avaliable does not exist
+        # if node  not found
+        if node is None:
+            return None
+        # else node was found
         else:
-            print('warning key ({key}) was not found')
-        return
+
+            res = node.value
+            # remove from linked list
+            if prev is None:
+                node = None
+            else:
+                prev.next = prev.next.next
+            return res
 
     def retrieve(self, key):
         '''
@@ -97,16 +109,19 @@ class HashTable:
         '''
         #  pass key through the mod function to get index
         index = self._hash_mod(key)
+        node = self.storage[index]
 
-        # if key is not found return None
-        if self.storage is not None:
-            if self.storage[index][0] == key:
-                return self.storage[index][1]
-            else:
-                print(f'warining collision at ({index})')
+        # traversing linked list
+        if node is not None and node.key != key:
+            node = node.next
+
+        # not found
+        if node is None:
+            return None
+
+        # if found return value
         else:
-            return
-        return
+            return node.value
 
     def resize(self):
         '''
@@ -115,6 +130,7 @@ class HashTable:
 
         Fill this in.
         '''
+
         old_storage = self.storage
         # double cap
         self.capacity *= 2
@@ -123,7 +139,10 @@ class HashTable:
         # assign old storage to new storage
 
         for item in old_storage:
-            self.insert(item[0], item[1])
+            if item != None:
+                while item:
+                    self.insert(item.key, item.value)
+                    item = item.next
 
 
 if __name__ == "__main__":
@@ -134,22 +153,23 @@ if __name__ == "__main__":
     ht.insert("line_3", "Linked list saves the day!")
 
     # print(ht.insert("line_1", "Tiny hash table"))
+    # print(ht.insert("line_2", "Filled beyond capacity"))
 
     # Test storing beyond capacity
     print(ht.retrieve("line_1"))
     print(ht.retrieve("line_2"))
-    # print(ht.retrieve("line_3"))
+    print(ht.retrieve("line_3"))
 
     # # Test resizing
-    # old_capacity = len(ht.storage)
-    # ht.resize()
-    # new_capacity = len(ht.storage)
+    old_capacity = len(ht.storage)
+    ht.resize()
+    new_capacity = len(ht.storage)
 
-    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
     # # Test if data intact after resizing
-    # print(ht.retrieve("line_1"))
-    # print(ht.retrieve("line_2"))
-    # print(ht.retrieve("line_3"))
+    print(ht.retrieve("line_1"))
+    print(ht.retrieve("line_2"))
+    print(ht.retrieve("line_3"))
 
-    # print("")
+    print("")
